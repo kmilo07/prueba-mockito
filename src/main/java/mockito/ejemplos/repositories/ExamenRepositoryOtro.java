@@ -7,6 +7,11 @@ import java.util.concurrent.TimeUnit;
 
 public class ExamenRepositoryOtro implements ExamenRepositoryInterface{
     @Override
+    public Examen guardar(Examen examen) {
+        return null;
+    }
+
+    @Override
     public List<Examen> findAll() {
         try{
             System.out.println("ExamenRepositoryOtro");
