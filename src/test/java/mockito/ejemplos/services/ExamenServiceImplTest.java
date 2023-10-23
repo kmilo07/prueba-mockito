@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -63,5 +62,29 @@ class ExamenServiceImplTest {
         Examen examen = service.findExamenPorNombreConPreguntas("Lenguaje");
         assertEquals(5, examen.getPreguntas().size());
         assertTrue(examen.getPreguntas().contains("derivadas"));
+    }
+
+    /*
+    Es verify es un metodo que nos ayuda a saber si un metodo se ejecuta o no, en este caso en el servicio tenemos un if
+    si el if no cumple, no va a ejecutar el pregunta repository por lo cual debe de arrojar error
+     */
+    @Test
+    void testPreguntasExamenVerify() {
+        when(repositoryInterface.findAll()).thenReturn(Datos.EXAMENES);
+        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+        Examen examen = service.findExamenPorNombreConPreguntas("Lenguaje");
+        assertEquals(5, examen.getPreguntas().size());
+        assertTrue(examen.getPreguntas().contains("derivadas"));
+        verify(repositoryInterface).findAll();   //El punto debe de estar fuera de los parentesis
+        verify(preguntaRepository).findPreguntasPorExamenId(6L); // debe ser el id del lenguaje sino falla
+    }
+    @Test
+    void testNoExisteExamenVerify() {
+        when(repositoryInterface.findAll()).thenReturn(Datos.EXAMENES);
+        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+        Examen examen = service.findExamenPorNombreConPreguntas("Lenguaje2");
+        assertNull(examen);
+        verify(repositoryInterface).findAll();   //El punto debe de estar fuera de los parentesis
+        verify(preguntaRepository).findPreguntasPorExamenId(6L);
     }
 }
