@@ -2,6 +2,8 @@ package mockito.ejemplos.services;
 
 import mockito.ejemplos.models.Examen;
 
+import java.util.Optional;
+
 public interface ExamenServiceInterface {
-    Examen findExamentPorNombre(String nombre);
+    Optional<Examen> findExamentPorNombre(String nombre);
 }
