@@ -5,6 +5,12 @@ import mockito.ejemplos.repositories.ExamenRepositoryInterface;
 import mockito.ejemplos.repositories.PreguntaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import static org.mockito.Mockito.*;
 
 import java.util.Collections;
@@ -13,17 +19,23 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class) // Otra forma de habilitar la anotacion de injeccion, se debe tener el jupiter
 class ExamenServiceImplTest {
 
+    @Mock
     ExamenRepositoryInterface repositoryInterface;
-    ExamenServiceInterface service;
+    @Mock
     PreguntaRepository preguntaRepository;
+
+    @InjectMocks
+    ExamenServiceImpl service; //No puede ser una interfaz si no la clase concreta
 
     @BeforeEach
     void setUp() {
-        repositoryInterface = mock(ExamenRepositoryInterface.class);
-        preguntaRepository = mock(PreguntaRepository.class);
-        service = new ExamenServiceImpl(repositoryInterface, preguntaRepository);
+//        MockitoAnnotations.openMocks(this); //Se necesita habilitar la anotacion de injeccion
+//        repositoryInterface = mock(ExamenRepositoryInterface.class);
+//        preguntaRepository = mock(PreguntaRepository.class);
+//        service = new ExamenServiceImpl(repositoryInterface, preguntaRepository);
     }
 
     @Test
@@ -82,8 +94,8 @@ class ExamenServiceImplTest {
     void testNoExisteExamenVerify() {
         when(repositoryInterface.findAll()).thenReturn(Datos.EXAMENES);
         when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
-        Examen examen = service.findExamenPorNombreConPreguntas("Lenguaje2");
-        assertNull(examen);
+        Examen examen = service.findExamenPorNombreConPreguntas("Lenguaje");
+        assertNotNull(examen);
         verify(repositoryInterface).findAll();   //El punto debe de estar fuera de los parentesis
         verify(preguntaRepository).findPreguntasPorExamenId(6L);
     }
