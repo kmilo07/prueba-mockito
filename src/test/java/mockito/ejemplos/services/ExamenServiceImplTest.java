@@ -2,6 +2,8 @@ package mockito.ejemplos.services;
 
 import mockito.ejemplos.models.Examen;
 import mockito.ejemplos.repositories.ExamenRepositoryInterface;
+import mockito.ejemplos.repositories.PreguntaRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 
@@ -13,10 +15,20 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ExamenServiceImplTest {
+
+    ExamenRepositoryInterface repositoryInterface;
+    ExamenServiceInterface service;
+    PreguntaRepository preguntaRepository;
+
+    @BeforeEach
+    void setUp() {
+        repositoryInterface = mock(ExamenRepositoryInterface.class);
+        preguntaRepository = mock(PreguntaRepository.class);
+        service = new ExamenServiceImpl(repositoryInterface, preguntaRepository);
+    }
+
     @Test
     void findExamenPorNombre() {
-        ExamenRepositoryInterface repositoryInterface = mock(ExamenRepositoryInterface.class);
-        ExamenServiceInterface service = new ExamenServiceImpl(repositoryInterface);
         List<Examen> datos = Arrays.asList(new Examen(5L,"Matemáticas"), new Examen(6L,"Lenguaje"),
                 new Examen(7L,"Historia"));
 
@@ -27,18 +39,17 @@ class ExamenServiceImplTest {
         assertEquals(5L,examen.orElseThrow().getId());
         assertEquals("Matemáticas",examen.orElseThrow().getNombre());
     }
+
     @Test
     void findExamenPorNombreListaVacia() {
-        ExamenRepositoryInterface repositoryInterface = mock(ExamenRepositoryInterface.class);
-        ExamenServiceInterface service = new ExamenServiceImpl(repositoryInterface);
         List<Examen> datos = Collections.emptyList();
 
         when(repositoryInterface.findAll()).thenReturn(datos);
         Optional<Examen> examen = service.findExamentPorNombre("Matemáticas");
 
-        assertTrue(examen.isPresent());
-        assertEquals(5L,examen.orElseThrow().getId());
-        assertEquals("Matemáticas",examen.orElseThrow().getNombre());
+        assertFalse(examen.isPresent());
     }
+
+
 
 }
