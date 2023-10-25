@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -183,5 +182,32 @@ class ExamenServiceImplTest {
         verify(repositoryInterface).findAll();
         verify(preguntaRepository).findPreguntasPorExamenId(argThat(arg-> arg.equals(6L)));
         verify(preguntaRepository).findPreguntasPorExamenId(eq(6L));
+    }
+
+    @Test
+    void testArgumentMatcherCustomisado(){
+        //when(repositoryInterface.findAll()).thenReturn(Datos.EXAMENES_NEGATIVE);
+        when(repositoryInterface.findAll()).thenReturn(Datos.EXAMENES);
+        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+
+        service.findExamenPorNombreConPreguntas("Lenguaje");
+
+        verify(repositoryInterface).findAll();
+        verify(preguntaRepository).findPreguntasPorExamenId(argThat(new MiArgMatchers()));
+    }
+
+    public static class MiArgMatchers implements ArgumentMatcher<Long>{
+        private Long argument;
+
+        @Override
+        public boolean matches(Long argument) {
+            this.argument = argument;
+            return argument != null && argument > 0;
+        }
+
+        @Override
+        public String toString() {
+            return "es para un mensaje cuando falla; "+argument+" debe ser un numero entero positivo.";
+        }
     }
 }
