@@ -6,6 +6,8 @@ import mockito.ejemplos.repositories.PreguntaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -169,5 +171,17 @@ class ExamenServiceImplTest {
 
         verify(repositoryInterface).findAll();
         verify(preguntaRepository).findPreguntasPorExamenId(isNull());
+    }
+
+    @Test
+    void testArgumentMatcher(){
+        when(repositoryInterface.findAll()).thenReturn(Datos.EXAMENES);
+        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+
+        service.findExamenPorNombreConPreguntas("Lenguaje");
+
+        verify(repositoryInterface).findAll();
+        verify(preguntaRepository).findPreguntasPorExamenId(argThat(arg-> arg.equals(6L)));
+        verify(preguntaRepository).findPreguntasPorExamenId(eq(6L));
     }
 }
