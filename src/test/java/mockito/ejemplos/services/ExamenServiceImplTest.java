@@ -6,9 +6,7 @@ import mockito.ejemplos.repositories.PreguntaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
@@ -31,6 +29,9 @@ class ExamenServiceImplTest {
 
     @InjectMocks
     ExamenServiceImpl service; //No puede ser una interfaz si no la clase concreta
+
+    @Captor //otra forma de obtener los argumentos
+    ArgumentCaptor<Long> captor;
 
     @BeforeEach
     void setUp() {
@@ -209,5 +210,18 @@ class ExamenServiceImplTest {
         public String toString() {
             return "es para un mensaje cuando falla; "+argument+" debe ser un numero entero positivo.";
         }
+    }
+
+    @Test
+    void testArgumentCaptor() {
+        when(repositoryInterface.findAll()).thenReturn(Datos.EXAMENES);
+
+        service.findExamenPorNombreConPreguntas("Lenguaje");
+
+        //ArgumentCaptor<Long> captor = ArgumentCaptor.forClass(Long.class); 1ra forma
+        verify(preguntaRepository).findPreguntasPorExamenId(captor.capture());
+
+        assertEquals(6L, captor.getValue());
+
     }
 }
