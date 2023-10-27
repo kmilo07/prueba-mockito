@@ -16,6 +16,7 @@ import static org.mockito.Mockito.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -236,4 +237,46 @@ class ExamenServiceImplTest {
             service.guardar(examen);
         });
     }
+
+    @Test
+    void testDoAnswer() {
+        when(repositoryInterface.findAll()).thenReturn(Datos.EXAMENES);
+        doAnswer(invocation ->{
+                Long id = invocation.getArgument(0);
+                return id == 5L ? Datos.PREGUNTAS : Collections.emptyList();
+
+                }).when(preguntaRepository).findPreguntasPorExamenId(anyLong());
+        Examen examen = service.findExamenPorNombreConPreguntas("Matemáticas");
+        assertEquals(5L, examen.getId());
+        assertEquals("Matemáticas", examen.getNombre());
+        assertEquals(5,examen.getPreguntas().size());
+    }
+
+    @Test
+    void testDoAnswerGuardarExamenWithoutId() {
+        //Given precondiciones para entorno de pruebas
+        Examen newExamen = Datos.EXAMEN2;
+        newExamen.setPreguntas(Datos.PREGUNTAS);
+        doAnswer(new Answer<Examen>() {
+
+            Long secuencia = 8L;
+
+            @Override
+            public Examen answer(InvocationOnMock invocation) throws Throwable{
+                Examen examen  = invocation.getArgument(0);
+                examen.setId(secuencia++);
+                return examen;
+            }
+        }).when(repositoryInterface).guardar(any(Examen.class));
+
+        //When
+        Examen examen = service.guardar(newExamen);
+        assertEquals(8L, examen.getId());
+        assertEquals("Fisica",examen.getNombre());
+
+        //Then
+        verify(repositoryInterface).guardar(any(Examen.class));
+        verify(preguntaRepository).guardarVarias(anyList());
+    }
+
 }
