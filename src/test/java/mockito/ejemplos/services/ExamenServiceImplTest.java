@@ -279,4 +279,74 @@ class ExamenServiceImplTest {
         verify(preguntaRepository).guardarVarias(anyList());
     }
 
+    /*
+    el metodo doCall se utiliza para usar el metodo real
+     */
+
+    @Test
+    void testDoCallRealMethod() {
+        when(repositoryInterface.findAll()).thenReturn(Datos.EXAMENES);
+//        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(Datos.PREGUNTAS);
+        doCallRealMethod().when(preguntaRepository).findPreguntasPorExamenId(anyLong());
+        Examen examen = service.findExamenPorNombreConPreguntas("Matemáticas");
+        assertEquals(5L, examen.getId());
+        assertEquals("Matemáticas", examen.getNombre());
+
+    }
+
+    @Test
+    void testSpy() {
+        ExamenRepository examenRepository = spy(ExamenRepositoryImpl.class);
+        PreguntaRepository preguntaRepository = spy(PreguntaRepositoryImpl.class);
+        ExamenService examenService = new ExamenServiceImpl(examenRepository, preguntaRepository);
+
+        List<String> preguntas = Arrays.asList("aritmética");
+//        when(preguntaRepository.findPreguntasPorExamenId(anyLong())).thenReturn(preguntas);
+        doReturn(preguntas).when(preguntaRepository).findPreguntasPorExamenId(anyLong());
+
+        Examen examen = examenService.findExamenPorNombreConPreguntas("Matemáticas");
+        assertEquals(5, examen.getId());
+        assertEquals("Matemáticas", examen.getNombre());
+        assertEquals(1, examen.getPreguntas().size());
+        assertTrue(examen.getPreguntas().contains("aritmética"));
+
+        verify(examenRepository).findAll();
+        verify(preguntaRepository).findPreguntasPorExamenId(anyLong());
+    }
+
+ /*
+ para conocer el orden con el que se ejecutar una consulta
+  */
+ @Test
+ void testOrdenDeInvocaciones2() {
+     when(repository.findAll()).thenReturn(Datos.EXAMENES);
+
+     service.findExamenPorNombreConPreguntas("Matemáticas");
+     service.findExamenPorNombreConPreguntas("Lenguaje");
+
+     InOrder inOrder = inOrder(repository, preguntaRepository);
+     inOrder.verify(repository).findAll();
+     inOrder.verify(preguntaRepository).findPreguntasPorExamenId(5L);
+
+     inOrder.verify(repository).findAll();
+     inOrder.verify(preguntaRepository).findPreguntasPorExamenId(6L);
+
+ }
+
+ /*
+  Test invocacion es el que se encarga de decir el
+  */
+ @Test
+ void testNumeroDeInvocaciones() {
+     when(repository.findAll()).thenReturn(Datos.EXAMENES);
+     service.findExamenPorNombreConPreguntas("Matemáticas");
+
+     verify(preguntaRepository).findPreguntasPorExamenId(5L);
+     verify(preguntaRepository, times(1)).findPreguntasPorExamenId(5L);
+     verify(preguntaRepository, atLeast(1)).findPreguntasPorExamenId(5L);
+     verify(preguntaRepository, atLeastOnce()).findPreguntasPorExamenId(5L);
+     verify(preguntaRepository, atMost(1)).findPreguntasPorExamenId(5L);
+     verify(preguntaRepository, atMostOnce()).findPreguntasPorExamenId(5L);
+ }
+
 }
